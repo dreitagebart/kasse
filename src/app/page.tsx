@@ -1,95 +1,115 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+'use client'
 
-export default function Home() {
-  return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>src/app/page.tsx</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
+import {
+  AppShell,
+  AppShellHeader,
+  AppShellMain,
+  AppShellNavbar,
+  Burger,
+  Flex,
+  Group,
+  Stack,
+  Text,
+  Title
+} from '@mantine/core'
+import { useDisclosure, useLocalStorage } from '@mantine/hooks'
+import { NextPage } from 'next'
+import { useCallback } from 'react'
 
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
+import { BookItem } from '~/components/book-item'
+import { ColorSchemeToggle } from '~/components/color-scheme-toggle'
+import { Total } from '~/components/total'
+import { defaultItems } from '~/config'
+import { Item, Items, SubOrAdd } from '~/types'
 
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore starter templates for Next.js.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  );
+interface FormState {
+  items: Items
+  total: number
 }
+
+const items: Items = defaultItems.map((item, index) => ({
+  ...item,
+  quantity: 0,
+  id: index
+}))
+
+const Page: NextPage = () => {
+  const [opened, { toggle }] = useDisclosure(false)
+  const [values, setValues] = useLocalStorage<FormState>({
+    key: 'items',
+    defaultValue: { items, total: 0 }
+  })
+  const bookItem = useCallback(
+    (suboradd: SubOrAdd, item: Item) => {
+      setValues((values) => ({
+        items: values.items.map((i) =>
+          i.id === item.id
+            ? {
+                ...i,
+                quantity:
+                  suboradd === '+'
+                    ? item.quantity + 1
+                    : suboradd === '-'
+                    ? item.quantity - 1
+                    : 0
+              }
+            : i
+        ),
+        total:
+          suboradd === '+'
+            ? values.total + item.price
+            : suboradd === '-'
+            ? values.total - item.price
+            : 0
+      }))
+    },
+    [setValues]
+  )
+
+  return (
+    <AppShell
+      header={{ height: 60 }}
+      navbar={{
+        width: 300,
+        breakpoint: 'sm',
+        collapsed: { mobile: !opened, desktop: !opened }
+      }}
+      padding='md'
+    >
+      <AppShellHeader>
+        <Group h='100%' px='md'>
+          <Burger opened={opened} onClick={toggle} size='sm' />
+          <Title>Kasse</Title>
+        </Group>
+      </AppShellHeader>
+      <AppShellNavbar p='md'>
+        <Title order={4}>Einstellungen</Title>
+        <Group mt='xl' justify='space-between'>
+          <Text fw='bold'>Dark mode</Text>
+          <ColorSchemeToggle></ColorSchemeToggle>
+        </Group>
+      </AppShellNavbar>
+      <AppShellMain>
+        <Flex direction='column' gap='xl'>
+          <Total
+            onReset={() => setValues({ total: 0, items })}
+            total={values.total}
+          ></Total>
+          <Stack>
+            {values.items.map((item) => {
+              return (
+                <BookItem
+                  key={item.id}
+                  item={item}
+                  onBook={(suboradd, item) => bookItem(suboradd, item)}
+                ></BookItem>
+              )
+            })}
+          </Stack>
+        </Flex>
+      </AppShellMain>
+    </AppShell>
+  )
+}
+
+export default Page
