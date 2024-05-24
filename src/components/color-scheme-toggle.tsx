@@ -7,9 +7,10 @@ import {
   useComputedColorScheme,
   useMantineColorScheme
 } from '@mantine/core'
-import { useCallback } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 export const ColorSchemeToggle = () => {
+  const [darkmode, setDarkmode] = useState(false)
   const { setColorScheme } = useMantineColorScheme()
   const computedColorScheme = useComputedColorScheme('light', {
     getInitialValueInEffect: false
@@ -19,11 +20,19 @@ export const ColorSchemeToggle = () => {
     [computedColorScheme, setColorScheme]
   )
 
+  useEffect(() => {
+    if (computedColorScheme === 'dark') {
+      setDarkmode(true)
+    } else {
+      setDarkmode(false)
+    }
+  }, [computedColorScheme])
+
   return (
     <Switch
       size='lg'
       color='dark.4'
-      checked={computedColorScheme === 'dark'}
+      checked={darkmode}
       onChange={toggleColorScheme}
       onLabel={<IconSun style={{ width: rem(20), height: rem(20) }} />}
       offLabel={<IconMoonStars style={{ width: rem(20), height: rem(20) }} />}

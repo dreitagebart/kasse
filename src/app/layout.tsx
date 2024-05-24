@@ -1,9 +1,5 @@
 import '@mantine/core/styles.css'
-import {
-  ColorSchemeScript,
-  MantineProvider,
-  localStorageColorSchemeManager
-} from '@mantine/core'
+import { ColorSchemeScript, MantineProvider } from '@mantine/core'
 import { Metadata } from 'next'
 import { FC, PropsWithChildren } from 'react'
 
@@ -18,10 +14,10 @@ const RootLayout: FC<Props> = ({ children }) => {
   return (
     <html lang='de'>
       <head>
-        <ColorSchemeScript defaultColorScheme='auto' />
+        <ColorSchemeScript defaultColorScheme='light' />
       </head>
       <body>
-        <MantineProvider defaultColorScheme='auto'>{children}</MantineProvider>
+        <MantineProvider defaultColorScheme='light'>{children}</MantineProvider>
       </body>
     </html>
   )

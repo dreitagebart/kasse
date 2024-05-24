@@ -1,23 +1,13 @@
 'use client'
 
-import {
-  AppShell,
-  AppShellHeader,
-  AppShellMain,
-  AppShellNavbar,
-  Burger,
-  Flex,
-  Group,
-  Stack,
-  Text,
-  Title
-} from '@mantine/core'
+import { AppShell, AppShellMain, Flex, Stack } from '@mantine/core'
 import { useDisclosure, useLocalStorage } from '@mantine/hooks'
 import { NextPage } from 'next'
 import { useCallback } from 'react'
 
 import { BookItem } from '~/components/book-item'
-import { ColorSchemeToggle } from '~/components/color-scheme-toggle'
+import { Header } from '~/components/header'
+import { Navbar } from '~/components/navbar'
 import { Total } from '~/components/total'
 import { defaultItems } from '~/config'
 import { Item, Items, SubOrAdd } from '~/types'
@@ -76,19 +66,8 @@ const Page: NextPage = () => {
       }}
       padding='md'
     >
-      <AppShellHeader>
-        <Group h='100%' px='md'>
-          <Burger opened={opened} onClick={toggle} size='sm' />
-          <Title>Kasse</Title>
-        </Group>
-      </AppShellHeader>
-      <AppShellNavbar p='md'>
-        <Title order={4}>Einstellungen</Title>
-        <Group mt='xl' justify='space-between'>
-          <Text fw='bold'>Dark mode</Text>
-          <ColorSchemeToggle></ColorSchemeToggle>
-        </Group>
-      </AppShellNavbar>
+      <Header onToggle={toggle} opened={opened}></Header>
+      <Navbar></Navbar>
       <AppShellMain>
         <Flex direction='column' gap='xl'>
           <Total
